@@ -21,7 +21,7 @@ jobs:
                    app/src/main/assets/Roohu-ClipForge.html \
                    app/src/main/java/com/roohu/clipforge/MainActivity.java \
                    app/src/main/res/layout/activity_main.xml; do
-            if [ ! -f "$f" ]; then echo "::error::Missing required file: $f (upload the whole project, including the hidden .github folder)"; missing=1; fi
+            if [ ! -f "$f" ]; then echo "::error::Missing required file: $f"; missing=1; fi
           done
           exit $missing
 
@@ -35,7 +35,7 @@ jobs:
           unzip -q hi.zip && mv vosk-model-small-hi-0.22 model-hi && rm hi.zip
           ls model-en model-hi
 
-      - name: Download display fonts (real 3D-caption fonts)
+      - name: Download display fonts
         run: |
           mkdir -p app/src/main/assets/fonts
           cd app/src/main/assets/fonts
@@ -59,11 +59,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install SDK packages
-        run: sdkmanager --install "platforms;android-34" "build-tools;34.0.0"
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --licenses </dev/null || true
+          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Set up Gradle 8.7
         uses: gradle/actions/setup-gradle@v4
@@ -88,4 +87,4 @@ jobs:
 
       - name: Explain failure
         if: failure()
-        run: echo "::error::The build failed. Open the failed step above and read the first line starting with 'error:' or 'What went wrong:'. Send that text to get it fixed."
+        run: echo "::error::The build failed. Open the failed step above and read the first line starting with 'error:' or 'What went wrong:'."
