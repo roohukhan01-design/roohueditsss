@@ -41,6 +41,15 @@ android {
         resources { excludes += ['/META-INF/{AL2.0,LGPL2.1}', '/META-INF/DEPENDENCIES'] }
     }
 }
+
+// Kotlin 1.8.20+ includes the JDK 7/8 extension classes in kotlin-stdlib.
+// Older transitive dependencies (for example Vosk) can still request the
+// legacy split artifacts and cause duplicate classes during D8/R8 processing.
+configurations.configureEach {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
+
 dependencies {
     implementation 'androidx.activity:activity:1.9.0'
     implementation 'androidx.webkit:webkit:1.11.0'
