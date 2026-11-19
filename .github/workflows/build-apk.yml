@@ -60,6 +60,7 @@ jobs:
           java-version: '17'
 
       - name: Install Android command-line tools and SDK packages
+        shell: bash
         run: |
           set -euo pipefail
           export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
@@ -71,7 +72,14 @@ jobs:
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --licenses </dev/null
+          set +o pipefail
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --licenses
+          license_status=${PIPESTATUS[1]}
+          set -o pipefail
+          if [ "$license_status" -ne 0 ]; then
+            echo "::error::Android SDK license acceptance failed"
+            exit "$license_status"
+          fi
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --list_installed
 
